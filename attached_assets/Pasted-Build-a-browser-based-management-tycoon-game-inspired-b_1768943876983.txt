@@ -1,0 +1,22 @@
+Build a browser-based management/tycoon game inspired by “Game Dev Tycoon,” but the player is a 19th-century classical composer building reputation by composing works and navigating patrons, publishers, premieres, and public taste.
+Tech constraints: I would like Persist progress using local Storage if possible
+Game loop:
+Player chooses a new composition (form + era style + instrumentation).
+Player allocates limited weekly time/energy into composition phases (Sketching, Orchestration, Rehearsal Prep, Revision).
+Random/weighted events happen (patron requests, illness, instrument availability, rival composer premiere, publisher offer, war/economic downturn).
+Player schedules a premiere, selects venue, hires musicians, optionally dedicates to patron.
+After premiere, the work receives reviews and generates money + reputation.
+Player upgrades their situation (better apartment/study, piano, copyists, networking, access to orchestra, publisher relationships).
+Core stats/resources: Money, Reputation, Inspiration, Health/Energy, Network/Connections, “Public Taste” trends (e.g., virtuosity vs lyricism, sacred vs secular, nationalist vs cosmopolitan).
+Composition system: Each work has attributes: Form (Symphony, String Quartet, Piano Sonata, Lied, Opera, Mass), Style (Classical, Early Romantic, Late Romantic), Complexity, Novelty, Accessibility, Length, Instrumentation. Player choices + skill levels generate a “Quality” score; Quality interacts with taste trends and venue/musician quality to produce success.
+Progression: Skills improve over time: Melody, Harmony, Orchestration, Form, Productivity, Social. Unlock new forms/venues/patrons as reputation grows.
+UI: Clean, readable “ledger” style UI. Left sidebar shows resources/stats and current week/date (starting around 1820). Main area is tabs: “Compose,” “Premiere,” “Career,” “Upgrades,” “History.” Include a log panel with events and results.
+Balancing: Keep the MVP simple but playable: 10–20 minutes to reach a “minor famous composer” milestone. Avoid overwhelming menus.
+Required features:
+Start new game / save / load / reset (localStorage).
+At least 5 composition forms and 3 venues.
+At least 12 random events with meaningful choices (tradeoffs).
+A simple trend system that shifts every few in-game months and affects review outcomes.
+A results screen after each premiere: review snippet, earnings, reputation change, and what factors influenced it (tooltips or breakdown).
+Tone & flavor: Lightly humorous but respectful; text evokes 19th-century Europe.  
+
