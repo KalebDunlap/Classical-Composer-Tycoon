@@ -70,3 +70,32 @@ Three-panel layout following the design guidelines:
 - `react-day-picker`: Calendar component
 - `vaul`: Drawer component
 - `cmdk`: Command palette
+
+## Recent Changes (January 2026)
+
+### Completed Game Implementation
+- Built complete game engine with composition quality calculation based on skills and phase allocation
+- Implemented 7 composition forms: Piano Sonata, String Quartet, Symphony, Lied, Opera, Mass, Concerto
+- Created 5 venues: Private Salon, Civic Hall, Court Theatre, Opera House, Grand Concert Hall
+- Developed 12+ random events with meaningful choices affecting money, reputation, health, inspiration
+- Added skill progression system with 5 levels (Novice → Master)
+- Implemented 8 upgrades purchasable with money
+- Added trend system that shifts every 3 in-game months
+- Full localStorage save/load/reset functionality
+
+### Game Components
+- `StartScreen.tsx`: Initial game screen with new game/load/reset options
+- `Game.tsx`: Main game container managing state and tab navigation
+- `ResourcesSidebar.tsx`: Left panel showing money, reputation, skills, current trends
+- `ComposeTab.tsx`: Form/style/instrumentation selection and work-week allocation
+- `PremiereTab.tsx`: Venue selection, musician hiring, patron dedication
+- `CareerTab.tsx`: Composer profile and skill progression display
+- `UpgradesTab.tsx`: Purchasable upgrades that improve composition quality
+- `HistoryTab.tsx`: Catalogue of completed works and event chronicle
+- `EventModal.tsx`: Random event popups with choice buttons
+- `ResultsModal.tsx`: Post-premiere results with quality breakdown and review
+- `LogPanel.tsx`: Right panel showing event chronicle
+
+### Bug Fixes Applied
+- Consolidated work week state updates to prevent race conditions (single onWorkWeek handler)
+- Fixed Radix UI Select empty value error (use "none" instead of empty string)
