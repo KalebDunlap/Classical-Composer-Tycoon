@@ -35,7 +35,9 @@ import {
   Briefcase, 
   ShoppingBag, 
   BookOpen,
-  Save
+  Save,
+  LogOut,
+  ChevronRight
 } from 'lucide-react';
 
 export function Game() {
@@ -80,6 +82,46 @@ export function Game() {
         description: 'Your game has been saved.'
       });
     }
+  }, [gameState, toast]);
+
+  const handleExitGame = useCallback(() => {
+    if (gameState) {
+      saveGame(gameState);
+    }
+    setGameState(null);
+  }, [gameState]);
+
+  const handleNextWeek = useCallback(() => {
+    if (!gameState) return;
+    
+    let newState = advanceWeek(gameState);
+    newState = addLogEntry(newState, "A week passed in quiet contemplation.", 'system');
+    
+    // Check for random events
+    const event = getRandomEvent(newState.stats.reputation);
+    if (event) {
+      newState = {
+        ...newState,
+        currentEvent: event
+      };
+    }
+    
+    // Check milestones
+    const { state: checkedState, newMilestones } = checkMilestones(newState);
+    newState = checkedState;
+    
+    newMilestones.forEach(milestone => {
+      toast({
+        title: 'Achievement Unlocked!',
+        description: milestone
+      });
+    });
+    
+    setGameState(newState);
+    toast({
+      title: 'Time Passes',
+      description: 'You advanced to the next week.'
+    });
   }, [gameState, toast]);
 
   const handleStartComposition = useCallback((work: WorkInProgress) => {
@@ -375,15 +417,27 @@ export function Game() {
           <h1 className="font-serif text-lg font-semibold">
             Classical Composer Tycoon
           </h1>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSaveGame}
-            data-testid="button-save-game"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSaveGame}
+              data-testid="button-save-game"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleExitGame}
+              className="text-muted-foreground hover:text-destructive"
+              data-testid="button-exit-game"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Exit
+            </Button>
+          </div>
         </header>
         
         <main className="flex-1 overflow-hidden">
@@ -416,6 +470,17 @@ export function Game() {
                 <BookOpen className="h-4 w-4" />
                 History
               </TabsTrigger>
+              <div className="flex-1" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleNextWeek}
+                className="h-8 gap-2 ml-2 hover:bg-primary/10"
+                data-testid="button-next-week"
+              >
+                <span>Next Week</span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </TabsList>
             
             <div className="flex-1 overflow-y-auto p-4">
