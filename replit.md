@@ -87,6 +87,7 @@ Three-panel layout following the design guidelines:
 - `StartScreen.tsx`: Initial game screen with new game/load/reset options
 - `Game.tsx`: Main game container managing state and tab navigation
 - `ResourcesSidebar.tsx`: Left panel showing money, reputation, skills, current trends
+- `HomeTab.tsx`: Visual composer's study with 4 room tiers (Garret → Apartment → Grand Study → Country Retreat), piano upgrades, staff display, and activity status
 - `ComposeTab.tsx`: Form/style/instrumentation selection and work-week allocation
 - `PremiereTab.tsx`: Venue selection, musician hiring, patron dedication
 - `CareerTab.tsx`: Composer profile and skill progression display
@@ -99,3 +100,12 @@ Three-panel layout following the design guidelines:
 ### Bug Fixes Applied
 - Consolidated work week state updates to prevent race conditions (single onWorkWeek handler)
 - Fixed Radix UI Select empty value error (use "none" instead of empty string)
+
+### Navigation Improvements (January 2026)
+- Added "Exit Game" button in header to return to main menu
+- Added "Next Week" button in navigation bar to prevent game stagnation when short on funds
+- Added "Home" tab as first tab showing composer's study visualization with:
+  - 4 room tiers based on purchased upgrades (living category)
+  - Piano type that changes with instrument upgrades
+  - Staff members appear when copyist/assistant upgrades purchased
+  - Animated composition activity indicators
