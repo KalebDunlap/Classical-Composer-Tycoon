@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Coins, Star, Sparkles, Heart, Users, TrendingUp, TrendingDown } from 'lucide-react';
+import { Coins, Star, Sparkles, Heart, Users, TrendingUp, TrendingDown, BookOpen } from 'lucide-react';
 
 interface ResourcesSidebarProps {
   gameState: GameState;
@@ -48,6 +48,16 @@ export function ResourcesSidebar({ gameState }: ResourcesSidebarProps) {
             value={formatMoney(stats.money)}
             color="text-amber-600 dark:text-amber-400"
           />
+          
+          {gameState.weeklyPublisherIncome > 0 && (
+            <StatRow
+              icon={<BookOpen className="h-4 w-4" />}
+              label="Weekly Royalties"
+              value={`+${gameState.weeklyPublisherIncome} Th./wk`}
+              color="text-emerald-600 dark:text-emerald-400"
+              subtext="From published works"
+            />
+          )}
           
           <StatRow
             icon={<Star className="h-4 w-4" />}

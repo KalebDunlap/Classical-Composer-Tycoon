@@ -13,7 +13,10 @@ import {
   Quote,
   Theater,
   TrendingUp,
-  Info
+  TrendingDown,
+  Info,
+  Flame,
+  BookOpen
 } from 'lucide-react';
 
 interface HistoryTabProps {
@@ -48,7 +51,7 @@ export function HistoryTab({ works }: HistoryTabProps) {
         </p>
       </div>
       
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard 
           icon={<Music className="h-5 w-5" />}
           label="Total Works"
@@ -61,8 +64,14 @@ export function HistoryTab({ works }: HistoryTabProps) {
         />
         <StatCard 
           icon={<Coins className="h-5 w-5" />}
-          label="Total Earnings"
+          label="Premiere Earnings"
           value={works.reduce((s, w) => s + w.earnings, 0)}
+          suffix=" Th."
+        />
+        <StatCard 
+          icon={<BookOpen className="h-5 w-5" />}
+          label="Publisher Royalties"
+          value={works.reduce((s, w) => s + (w.totalPublisherEarnings || 0), 0)}
           suffix=" Th."
         />
       </div>
@@ -88,7 +97,8 @@ export function HistoryTab({ works }: HistoryTabProps) {
                       {COMPOSITION_FORMS[work.form].name} · {formatDate(work.premiereDate)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    <PopularityIndicator popularity={work.popularity || 0} />
                     <QualityBadge quality={work.quality} />
                   </div>
                 </div>
@@ -118,7 +128,13 @@ export function HistoryTab({ works }: HistoryTabProps) {
                         <p className="flex items-center gap-1">
                           <Coins className="h-3 w-3" />
                           <span className="text-green-600 dark:text-green-400">
-                            +{formatMoney(work.earnings)}
+                            +{formatMoney(work.earnings)} (premiere)
+                          </span>
+                        </p>
+                        <p className="flex items-center gap-1">
+                          <BookOpen className="h-3 w-3" />
+                          <span className="text-amber-600 dark:text-amber-400">
+                            +{formatMoney(work.totalPublisherEarnings || 0)} (royalties)
                           </span>
                         </p>
                         <p className="flex items-center gap-1">
@@ -129,6 +145,26 @@ export function HistoryTab({ works }: HistoryTabProps) {
                         </p>
                       </div>
                     </div>
+                  </div>
+                  
+                  <div className="mt-4 p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                        <Flame className="h-3 w-3" /> Current Popularity
+                      </span>
+                      <span className="text-sm font-mono">{Math.round(work.popularity || 0)}%</span>
+                    </div>
+                    <Progress 
+                      value={work.popularity || 0} 
+                      className="h-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {(work.popularity || 0) > 0 
+                        ? `Generating weekly royalties from publisher sales` 
+                        : work.isRevival 
+                          ? 'This revival has run its course'
+                          : 'No longer generating income - may receive revival offer'}
+                    </p>
                   </div>
                   
                   <div className="space-y-2">
@@ -213,5 +249,39 @@ function FactorBadge({ label, value }: { label: string; value: number }) {
       <span className="font-mono">{isPositive ? '+' : ''}{value}</span>
       <span className="block text-muted-foreground">{label}</span>
     </div>
+  );
+}
+
+function PopularityIndicator({ popularity }: { popularity: number }) {
+  if (popularity <= 0) {
+    return (
+      <Tooltip>
+        <TooltipTrigger>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <TrendingDown className="h-3 w-3" />
+            <span className="text-xs">Dormant</span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>No longer generating royalties</TooltipContent>
+      </Tooltip>
+    );
+  }
+  
+  const color = popularity > 60 
+    ? 'text-green-600 dark:text-green-400' 
+    : popularity > 30 
+      ? 'text-amber-600 dark:text-amber-400'
+      : 'text-red-600 dark:text-red-400';
+  
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <div className={`flex items-center gap-1 ${color}`}>
+          <Flame className="h-3 w-3" />
+          <span className="text-xs font-mono">{Math.round(popularity)}%</span>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>Current popularity - affects weekly royalties</TooltipContent>
+    </Tooltip>
   );
 }

@@ -28,6 +28,7 @@ import { HistoryTab } from './HistoryTab';
 import { EventModal } from './EventModal';
 import { ResultsModal } from './ResultsModal';
 import { AudioPlayer } from './AudioPlayer';
+import { RevivalModal, REVIVAL_COST, REVIVAL_INSPIRATION_COST } from './RevivalModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -200,7 +201,7 @@ export function Game() {
   const handleSchedulePremiere = useCallback((setup: PremiereSetup) => {
     if (!gameState || !readyForPremiere) return;
     
-    const { quality, factors, earnings, reputationGained, review } = calculatePremiereSuccess(
+    const { quality, factors, earnings, reputationGained, review, initialPopularity } = calculatePremiereSuccess(
       readyForPremiere,
       gameState.skills,
       gameState.tastes,
@@ -239,7 +240,10 @@ export function Game() {
       review,
       dedicatedTo: setup.dedicatedTo ? 
         gameState.patrons.find(p => p.id === setup.dedicatedTo)?.name : undefined,
-      factors
+      factors,
+      popularity: initialPopularity,
+      weeksSincePremiere: 0,
+      totalPublisherEarnings: 0
     };
     
     // Update patron relationship if dedicated
@@ -401,6 +405,96 @@ export function Game() {
     setActiveTab('compose');
   }, []);
 
+  const handleAcceptRevival = useCallback(() => {
+    if (!gameState || !gameState.pendingRevival) return;
+    
+    const revival = gameState.pendingRevival;
+    const originalWork = gameState.completedWorks.find(w => w.id === revival.workId);
+    if (!originalWork) return;
+    
+    // Check if player can afford
+    if (gameState.stats.money < REVIVAL_COST || gameState.stats.inspiration < REVIVAL_INSPIRATION_COST) {
+      toast({
+        title: 'Insufficient Resources',
+        description: 'You need more money or inspiration to revive this work.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    // Create the revival work - a new version with boosted quality
+    const qualityBoost = Math.round((gameState.skills.melody + gameState.skills.harmony) / 10);
+    const newQuality = Math.min(100, revival.originalQuality + qualityBoost + Math.floor(Math.random() * 10));
+    
+    const revivedWork: CompletedWork = {
+      id: `work_revival_${Date.now()}`,
+      title: `${originalWork.title} (Revised)`,
+      form: originalWork.form,
+      style: originalWork.style,
+      instrumentation: originalWork.instrumentation,
+      quality: newQuality,
+      premiereDate: { ...gameState.currentDate },
+      venue: originalWork.venue,
+      earnings: Math.round(newQuality * 5), // Bonus earnings from revival
+      reputationGained: Math.round(newQuality / 10),
+      review: `"A masterful revision that brings new life to a beloved classic."`,
+      dedicatedTo: undefined,
+      factors: {
+        baseQuality: revival.originalQuality,
+        skillBonus: qualityBoost,
+        trendAlignment: 0,
+        venueMatch: 0,
+        musicianQuality: 0,
+        patronBonus: 0
+      },
+      popularity: Math.min(100, newQuality + 10),
+      weeksSincePremiere: 0,
+      totalPublisherEarnings: 0,
+      isRevival: true,
+      originalWorkId: revival.workId
+    };
+    
+    let newState: GameState = {
+      ...gameState,
+      stats: {
+        ...gameState.stats,
+        money: gameState.stats.money - REVIVAL_COST + revivedWork.earnings,
+        reputation: gameState.stats.reputation + revivedWork.reputationGained,
+        inspiration: gameState.stats.inspiration - REVIVAL_INSPIRATION_COST + 15
+      },
+      completedWorks: [...gameState.completedWorks, revivedWork],
+      pendingRevival: null
+    };
+    
+    newState = addLogEntry(
+      newState, 
+      `Revised and re-premiered "${revivedWork.title}" with quality ${newQuality}!`,
+      'revival'
+    );
+    
+    setGameState(newState);
+    setPremiereResult(revivedWork);
+    
+    toast({
+      title: 'Revival Complete!',
+      description: `"${revivedWork.title}" has been successfully revived.`
+    });
+  }, [gameState, toast]);
+
+  const handleDeclineRevival = useCallback(() => {
+    if (!gameState) return;
+    
+    setGameState({
+      ...gameState,
+      pendingRevival: null
+    });
+    
+    toast({
+      title: 'Revival Declined',
+      description: 'Perhaps another opportunity will arise.'
+    });
+  }, [gameState, toast]);
+
   // Not started yet - show start screen
   if (!gameState?.started) {
     return (
@@ -546,6 +640,17 @@ export function Game() {
         result={premiereResult}
         onClose={handleCloseResults}
       />
+      
+      {gameState.pendingRevival && !gameState.currentEvent && !premiereResult && (
+        <RevivalModal
+          revival={gameState.pendingRevival}
+          originalWork={gameState.completedWorks.find(w => w.id === gameState.pendingRevival?.workId)}
+          onAccept={handleAcceptRevival}
+          onDecline={handleDeclineRevival}
+          playerMoney={gameState.stats.money}
+          playerInspiration={gameState.stats.inspiration}
+        />
+      )}
     </div>
   );
 }
