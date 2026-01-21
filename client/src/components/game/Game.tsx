@@ -41,8 +41,13 @@ import {
   BookOpen,
   Save,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Coins,
+  Star,
+  Sparkles,
+  Heart
 } from 'lucide-react';
+import { formatDate, formatMoney } from '@/lib/gameTypes';
 
 export function Game() {
   const [gameState, setGameState] = useState<GameState | null>(null);
