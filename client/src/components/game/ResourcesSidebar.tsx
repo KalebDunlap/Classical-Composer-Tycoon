@@ -22,7 +22,7 @@ export function ResourcesSidebar({ gameState }: ResourcesSidebarProps) {
   const { stats, currentDate, tastes, composerName } = gameState;
   
   return (
-    <div className="w-72 flex-shrink-0 border-r bg-sidebar p-4 overflow-y-auto">
+    <div className="w-64 lg:w-72 flex-shrink-0 border-r bg-sidebar p-4 overflow-y-auto hidden md:block">
       <div className="space-y-4">
         <Card className="border-2">
           <CardHeader className="pb-2">

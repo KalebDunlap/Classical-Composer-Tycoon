@@ -24,7 +24,7 @@ const typeColors: Record<LogEntry['type'], string> = {
 
 export function LogPanel({ entries }: LogPanelProps) {
   return (
-    <div className="w-80 flex-shrink-0 border-l bg-sidebar/50 flex flex-col">
+    <div className="w-64 lg:w-80 border-l bg-sidebar/50 flex flex-col hidden lg:flex">
       <div className="p-3 border-b">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Chronicle

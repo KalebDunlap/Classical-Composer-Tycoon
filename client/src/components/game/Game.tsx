@@ -506,87 +506,114 @@ export function Game() {
   }
 
   return (
-    <div className="h-screen flex bg-background">
-      <ResourcesSidebar gameState={gameState} />
+    <div className="h-screen flex flex-col md:flex-row bg-background overflow-hidden">
+      <div className="hidden md:block">
+        <ResourcesSidebar gameState={gameState} />
+      </div>
       
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center justify-between p-3 border-b bg-card/50">
-          <h1 className="font-serif text-lg font-semibold">
-            Classical Composer Tycoon
+      {/* Mobile Resources Header */}
+      <div className="md:hidden border-b bg-sidebar p-2 flex justify-around items-center text-xs overflow-x-auto whitespace-nowrap">
+        <div className="flex items-center gap-1">
+          <Coins className="h-3 w-3 text-amber-600" />
+          <span>{formatMoney(gameState.stats.money)}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Star className="h-3 w-3 text-purple-600" />
+          <span>{gameState.stats.reputation}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Sparkles className="h-3 w-3 text-blue-600" />
+          <span>{gameState.stats.inspiration}%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Heart className="h-3 w-3 text-red-600" />
+          <span>{gameState.stats.health}/{gameState.stats.maxHealth}</span>
+        </div>
+      </div>
+      
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="flex items-center justify-between p-2 md:p-3 border-b bg-card/50">
+          <h1 className="font-serif text-base md:text-lg font-semibold truncate mr-2">
+            Composer Tycoon
           </h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             <AudioPlayer />
             <Button 
               variant="outline" 
               size="sm" 
               onClick={handleSaveGame}
               data-testid="button-save-game"
+              className="h-8 px-2 md:px-3"
             >
-              <Save className="h-4 w-4 mr-2" />
-              Save
+              <Save className="h-3.5 w-3.5 md:mr-2" />
+              <span className="hidden md:inline">Save</span>
             </Button>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={handleExitGame}
-              className="text-muted-foreground hover:text-destructive"
+              className="h-8 px-2 md:px-3 text-muted-foreground hover:text-destructive"
               data-testid="button-exit-game"
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Exit
+              <LogOut className="h-3.5 w-3.5 md:mr-2" />
+              <span className="hidden md:inline">Exit</span>
             </Button>
           </div>
         </header>
         
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden flex flex-col">
           <Tabs 
             value={activeTab} 
             onValueChange={setActiveTab}
-            className="h-full flex flex-col"
+            className="flex-1 flex flex-col overflow-hidden"
           >
-            <TabsList className="mx-4 mt-4 mb-0 justify-start bg-muted/50 p-1">
-              <TabsTrigger value="home" className="gap-2" data-testid="tab-home">
-                <Home className="h-4 w-4" />
-                Home
-              </TabsTrigger>
-              <TabsTrigger value="compose" className="gap-2" data-testid="tab-compose">
-                <Music className="h-4 w-4" />
-                Compose
-              </TabsTrigger>
-              <TabsTrigger value="premiere" className="gap-2" data-testid="tab-premiere">
-                <Theater className="h-4 w-4" />
-                Premiere
-                {readyForPremiere && (
-                  <span className="ml-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="career" className="gap-2" data-testid="tab-career">
-                <Briefcase className="h-4 w-4" />
-                Career
-              </TabsTrigger>
-              <TabsTrigger value="upgrades" className="gap-2" data-testid="tab-upgrades">
-                <ShoppingBag className="h-4 w-4" />
-                Upgrades
-              </TabsTrigger>
-              <TabsTrigger value="history" className="gap-2" data-testid="tab-history">
-                <BookOpen className="h-4 w-4" />
-                History
-              </TabsTrigger>
-              <div className="flex-1" />
+            <div className="px-2 md:px-4 mt-2 md:mt-4 mb-0 overflow-x-auto scrollbar-hide">
+              <TabsList className="justify-start bg-muted/50 p-1 h-auto flex-nowrap inline-flex">
+                <TabsTrigger value="home" className="gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 text-xs md:text-sm" data-testid="tab-home">
+                  <Home className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <span>Home</span>
+                </TabsTrigger>
+                <TabsTrigger value="compose" className="gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 text-xs md:text-sm" data-testid="tab-compose">
+                  <Music className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <span>Compose</span>
+                </TabsTrigger>
+                <TabsTrigger value="premiere" className="gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 text-xs md:text-sm relative" data-testid="tab-premiere">
+                  <Theater className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <span>Premiere</span>
+                  {readyForPremiere && (
+                    <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="career" className="gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 text-xs md:text-sm" data-testid="tab-career">
+                  <Briefcase className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <span>Career</span>
+                </TabsTrigger>
+                <TabsTrigger value="upgrades" className="gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 text-xs md:text-sm" data-testid="tab-upgrades">
+                  <ShoppingBag className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <span>Upgrades</span>
+                </TabsTrigger>
+                <TabsTrigger value="history" className="gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 text-xs md:text-sm" data-testid="tab-history">
+                  <BookOpen className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <span>History</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <div className="flex justify-end px-2 md:px-4 mt-1">
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={handleNextWeek}
-                className="h-8 gap-2 ml-2"
+                className="h-8 gap-1 md:gap-2"
                 data-testid="button-next-week"
               >
-                <span>Next Week</span>
+                <span className="text-xs md:text-sm">Next Week</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
-            </TabsList>
+            </div>
             
-            <div className="flex-1 overflow-y-auto p-4">
-              <TabsContent value="home" className="m-0 h-full">
+            <div className="flex-1 overflow-hidden p-2 md:p-4">
+              <TabsContent value="home" className="m-0 h-full overflow-y-auto">
                 <HomeTab 
                   gameState={gameState}
                   onStartComposing={() => setActiveTab('compose')}
