@@ -28,6 +28,14 @@ import { HistoryTab } from './HistoryTab';
 import { EventModal } from './EventModal';
 import { ResultsModal } from './ResultsModal';
 import { AudioPlayer } from './AudioPlayer';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription, 
+  DialogFooter 
+} from '@/components/ui/dialog';
 import { RevivalModal, REVIVAL_COST, REVIVAL_INSPIRATION_COST } from './RevivalModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -672,8 +680,41 @@ export function Game() {
         result={premiereResult}
         onClose={handleCloseResults}
       />
+
+      <Dialog open={gameState.isGameOver} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl text-center">Final Intermezzo</DialogTitle>
+            <DialogDescription className="text-center pt-4 text-lg">
+              {gameState.gameOverReason === "died_of_old_age" 
+                ? `After a long and illustrious career, ${gameState.composerName} has died of old age. Their music will live on forever.`
+                : "Your journey as a composer has come to an end."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-6 space-y-4">
+            <div className="text-center space-y-1">
+              <p className="text-sm text-muted-foreground uppercase tracking-widest">Final Reputation</p>
+              <p className="text-3xl font-serif font-bold">{gameState.stats.reputation}</p>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-sm text-muted-foreground uppercase tracking-widest">Works Completed</p>
+              <p className="text-3xl font-serif font-bold">{gameState.completedWorks.length}</p>
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button 
+              variant="default" 
+              size="lg" 
+              onClick={handleExitGame}
+              className="w-full sm:w-auto"
+            >
+              Exit to Main Menu
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
-      {gameState.pendingRevival && !gameState.currentEvent && !premiereResult && (
+      {gameState.pendingRevival && !gameState.currentEvent && !premiereResult && !gameState.isGameOver && (
         <RevivalModal
           revival={gameState.pendingRevival}
           originalWork={gameState.completedWorks.find(w => w.id === gameState.pendingRevival?.workId)}

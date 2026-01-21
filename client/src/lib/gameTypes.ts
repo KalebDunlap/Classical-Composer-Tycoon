@@ -229,6 +229,8 @@ export interface GameState {
   achievedMilestones: string[];
   pendingRevival: RevivalOpportunity | null; // A piece that can be revived
   weeklyPublisherIncome: number; // Cached for display
+  isGameOver?: boolean;
+  gameOverReason?: string;
 }
 
 // Form definitions

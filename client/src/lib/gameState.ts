@@ -286,6 +286,17 @@ export function advanceWeek(state: GameState): GameState {
   
   // Add publisher income to money
   const newMoney = state.stats.money + weeklyIncome;
+
+  // Death by old age check (after Jan 1870, 0.5% chance)
+  let isGameOver = state.isGameOver;
+  let gameOverReason = state.gameOverReason;
+
+  if (!isGameOver && (newDate.year > 1870 || (newDate.year === 1870 && newDate.month >= 0))) {
+    if (Math.random() < 0.005) {
+      isGameOver = true;
+      gameOverReason = "died_of_old_age";
+    }
+  }
   
   return {
     ...state,
@@ -294,6 +305,8 @@ export function advanceWeek(state: GameState): GameState {
     completedWorks: updatedWorks,
     weeklyPublisherIncome: weeklyIncome,
     pendingRevival: revivalOpportunity,
+    isGameOver,
+    gameOverReason,
     stats: {
       ...state.stats,
       money: newMoney,
