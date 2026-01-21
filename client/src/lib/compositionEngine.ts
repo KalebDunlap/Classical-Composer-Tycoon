@@ -30,22 +30,37 @@ export function calculateBaseQuality(
   
   const phaseBalance = calculatePhaseBalance(work.phases);
   
-  // Skill contribution
-  const melodyContrib = skills.melody * styleData.modifiers.melody;
-  const harmonyContrib = skills.harmony * styleData.modifiers.harmony;
-  const orchestrationContrib = skills.orchestration * styleData.modifiers.orchestration;
-  const formContrib = skills.form;
+  // Skill contribution with diminishing returns
+  // Skills above 15 contribute less per point
+  const diminishingSkill = (skill: number) => {
+    if (skill <= 15) return skill;
+    return 15 + (skill - 15) * 0.5; // Half value above 15
+  };
+  
+  const melodyContrib = diminishingSkill(skills.melody) * styleData.modifiers.melody;
+  const harmonyContrib = diminishingSkill(skills.harmony) * styleData.modifiers.harmony;
+  const orchestrationContrib = diminishingSkill(skills.orchestration) * styleData.modifiers.orchestration;
+  const formContrib = diminishingSkill(skills.form);
   
   const skillAverage = (melodyContrib + harmonyContrib + orchestrationContrib + formContrib) / 4;
   
-  // Base quality formula
-  const phaseEfficiency = totalPhasePoints / (formData.baseWeeks * 10);
-  const baseQuality = (skillAverage * 0.6) + (phaseBalance * 20) + (phaseEfficiency * 30);
+  // Base quality formula - rebalanced to cap around 55-65 without bonuses
+  // Phase efficiency matters more, but gives less points
+  const phaseEfficiency = Math.min(1.2, totalPhasePoints / (formData.baseWeeks * 8));
+  const baseQuality = (skillAverage * 0.4) + (phaseBalance * 12) + (phaseEfficiency * 20);
   
-  // Difficulty penalty/bonus
-  const difficultyFactor = 1 - ((formData.difficulty - 3) * 0.05);
+  // Difficulty penalty is steeper - complex works are harder to master
+  const difficultyPenalty = (formData.difficulty - 1) * 3; // 0 to 15 penalty
   
-  return Math.round(Math.min(100, Math.max(0, baseQuality * difficultyFactor)));
+  // Random luck factor (-10 to +8) - genius moments vs. off days
+  const luckFactor = Math.floor(Math.random() * 19) - 10;
+  
+  // Inspiration affects quality ceiling - low inspiration caps quality
+  // This is checked during premiere, not here, but we add a small modifier
+  const rawQuality = baseQuality - difficultyPenalty + luckFactor;
+  
+  // Clamp to 0-75 for base quality - need bonuses to get higher
+  return Math.round(Math.min(75, Math.max(0, rawQuality)));
 }
 
 function calculatePhaseBalance(phases: CompositionPhases): number {
@@ -153,20 +168,20 @@ export function calculatePremiereSuccess(
   skills: Skills,
   tastes: TasteState,
   premiereSetup: PremiereSetup
-): { quality: number; factors: ScoreFactors; earnings: number; reputationGained: number; review: string } {
+): { quality: number; factors: ScoreFactors; earnings: number; reputationGained: number; review: string; initialPopularity: number } {
   const baseQuality = calculateBaseQuality(work, skills);
   const trendAlignment = calculateTrendAlignment(work, tastes);
   const venueMatch = calculateVenueMatch(work, premiereSetup.venue);
   const musicianQuality = calculateMusicianQualityBonus(premiereSetup.musicianQuality, work.instrumentation);
   
-  // Skill bonus from overall skill levels
+  // Skill bonus - reduced impact, only kicks in at high skill levels
   const avgSkill = (skills.melody + skills.harmony + skills.orchestration + skills.form) / 4;
-  const skillBonus = Math.round((avgSkill - 10) * 0.5);
+  const skillBonus = Math.max(0, Math.round((avgSkill - 15) * 0.3)); // Only bonus if avg > 15
   
-  // Patron bonus if dedicated
+  // Patron bonus if dedicated - reduced
   let patronBonus = 0;
   if (premiereSetup.dedicatedTo) {
-    patronBonus = 10;
+    patronBonus = 5;
   }
   
   const factors: ScoreFactors = {
@@ -178,16 +193,22 @@ export function calculatePremiereSuccess(
     patronBonus
   };
   
-  const totalQuality = Math.min(100, Math.max(0,
-    baseQuality + skillBonus + trendAlignment + venueMatch + musicianQuality + patronBonus
-  ));
+  // Perfect scores (95+) should be very rare
+  const rawTotal = baseQuality + skillBonus + trendAlignment + venueMatch + musicianQuality + patronBonus;
+  // Apply a soft cap above 85 - diminishing returns
+  let totalQuality = rawTotal;
+  if (rawTotal > 85) {
+    totalQuality = 85 + (rawTotal - 85) * 0.5;
+  }
+  totalQuality = Math.min(100, Math.max(0, Math.round(totalQuality)));
   
-  // Calculate earnings and reputation
+  // Calculate earnings and reputation - increased base earnings
   const venue = VENUES[premiereSetup.venue];
   const formData = COMPOSITION_FORMS[work.form];
   
-  const baseEarnings = venue.capacity * (totalQuality / 100) * 0.5;
-  const advertisingBonus = premiereSetup.advertisingSpent * 1.5;
+  // Premiere earnings boosted to help with costs
+  const baseEarnings = venue.capacity * (totalQuality / 100) * 0.8;
+  const advertisingBonus = premiereSetup.advertisingSpent * 2;
   const earnings = Math.round(baseEarnings + advertisingBonus);
   
   const baseReputation = formData.difficulty * (totalQuality / 100) * 3;
@@ -196,7 +217,10 @@ export function calculatePremiereSuccess(
   
   const review = generateReview(totalQuality, work, factors);
   
-  return { quality: totalQuality, factors, earnings, reputationGained, review };
+  // Calculate initial popularity based on quality and venue prestige
+  const initialPopularity = Math.min(100, Math.round(totalQuality * 0.8 + venue.prestige * 5));
+  
+  return { quality: totalQuality, factors, earnings, reputationGained, review, initialPopularity };
 }
 
 function generateReview(quality: number, work: WorkInProgress, factors: ScoreFactors): string {

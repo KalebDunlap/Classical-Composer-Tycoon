@@ -104,6 +104,12 @@ export interface CompletedWork {
   review: string;
   dedicatedTo?: string;
   factors: ScoreFactors;
+  // Passive income and popularity system
+  popularity: number; // 0-100, depletes over time
+  weeksSincePremiere: number;
+  totalPublisherEarnings: number;
+  isRevival?: boolean; // True if this is a revised version of an earlier work
+  originalWorkId?: string; // Reference to original if this is a revival
 }
 
 export interface ScoreFactors {
@@ -189,7 +195,13 @@ export interface LogEntry {
   id: string;
   date: GameDate;
   text: string;
-  type: 'event' | 'premiere' | 'composition' | 'upgrade' | 'system';
+  type: 'event' | 'premiere' | 'composition' | 'upgrade' | 'system' | 'income' | 'revival';
+}
+
+export interface RevivalOpportunity {
+  workId: string;
+  workTitle: string;
+  originalQuality: number;
 }
 
 export interface PremiereSetup {
@@ -215,6 +227,8 @@ export interface GameState {
   currentEvent: GameEvent | null;
   premiereSetup: PremiereSetup | null;
   achievedMilestones: string[];
+  pendingRevival: RevivalOpportunity | null; // A piece that can be revived
+  weeklyPublisherIncome: number; // Cached for display
 }
 
 // Form definitions

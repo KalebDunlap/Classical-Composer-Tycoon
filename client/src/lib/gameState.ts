@@ -6,7 +6,10 @@ import {
   Upgrade, 
   GameDate,
   LogEntry,
-  TasteTrend
+  TasteTrend,
+  CompletedWork,
+  COMPOSITION_FORMS,
+  RevivalOpportunity
 } from './gameTypes';
 
 const STORAGE_KEY = 'classical_composer_tycoon_save';
@@ -51,7 +54,9 @@ export function createInitialState(composerName: string): GameState {
     }],
     currentEvent: null,
     premiereSetup: null,
-    achievedMilestones: []
+    achievedMilestones: [],
+    pendingRevival: null,
+    weeklyPublisherIncome: 0
   };
 }
 
@@ -276,16 +281,91 @@ export function advanceWeek(state: GameState): GameState {
   const inspirationDrift = Math.random() > 0.5 ? 2 : -1;
   const newInspiration = Math.max(0, Math.min(100, state.stats.inspiration + inspirationDrift));
   
+  // Process publisher income and popularity decay
+  const { updatedWorks, weeklyIncome, revivalOpportunity } = processPublisherIncome(state.completedWorks, state.pendingRevival);
+  
+  // Add publisher income to money
+  const newMoney = state.stats.money + weeklyIncome;
+  
   return {
     ...state,
     currentDate: newDate,
     tastes: newTastes,
+    completedWorks: updatedWorks,
+    weeklyPublisherIncome: weeklyIncome,
+    pendingRevival: revivalOpportunity,
     stats: {
       ...state.stats,
+      money: newMoney,
       health: Math.min(state.stats.maxHealth, state.stats.health + healthRecovery),
       inspiration: newInspiration
     }
   };
+}
+
+// Calculate weekly publisher income and decay popularity
+function processPublisherIncome(
+  works: CompletedWork[],
+  existingRevival: RevivalOpportunity | null
+): { updatedWorks: CompletedWork[]; weeklyIncome: number; revivalOpportunity: RevivalOpportunity | null } {
+  let weeklyIncome = 0;
+  let revivalOpportunity = existingRevival;
+  
+  const updatedWorks = works.map(work => {
+    const updatedWork = { ...work };
+    updatedWork.weeksSincePremiere = (work.weeksSincePremiere || 0) + 1;
+    
+    // Initialize popularity if not set (for backwards compatibility)
+    if (updatedWork.popularity === undefined) {
+      updatedWork.popularity = Math.min(100, work.quality + 20);
+    }
+    
+    if (updatedWork.totalPublisherEarnings === undefined) {
+      updatedWork.totalPublisherEarnings = 0;
+    }
+    
+    // Calculate income based on popularity and quality
+    if (updatedWork.popularity > 0) {
+      // Base income formula: higher quality and complexity = more publisher earnings
+      const formData = COMPOSITION_FORMS[work.form];
+      const baseIncome = formData.difficulty * 0.5; // 0.5 to 3 per week base
+      const qualityMultiplier = work.quality / 100; // 0 to 1
+      const popularityMultiplier = updatedWork.popularity / 100; // 0 to 1
+      
+      const income = Math.round(baseIncome * qualityMultiplier * popularityMultiplier * 2);
+      weeklyIncome += income;
+      updatedWork.totalPublisherEarnings += income;
+      
+      // Decay popularity - faster for simpler works, slower for complex masterpieces
+      // Base decay: 1-3 points per week, modified by form complexity
+      const baseDecay = Math.max(0.5, 3 - (formData.difficulty * 0.4));
+      const qualityBonus = (work.quality / 100) * 0.5; // High quality decays slower
+      const decayRate = Math.max(0.3, baseDecay - qualityBonus);
+      
+      updatedWork.popularity = Math.max(0, updatedWork.popularity - decayRate);
+    }
+    
+    // Check for revival opportunity (only if no pending revival)
+    // Must be at least 52 weeks old (1 year), have 0 popularity, quality >= 50
+    if (!revivalOpportunity && 
+        updatedWork.popularity === 0 && 
+        updatedWork.weeksSincePremiere >= 52 &&
+        work.quality >= 50 &&
+        !work.isRevival) { // Can't revive a revival
+      // 3% chance per week for a revival opportunity
+      if (Math.random() < 0.03) {
+        revivalOpportunity = {
+          workId: work.id,
+          workTitle: work.title,
+          originalQuality: work.quality
+        };
+      }
+    }
+    
+    return updatedWork;
+  });
+  
+  return { updatedWorks, weeklyIncome, revivalOpportunity };
 }
 
 function shiftTastes(current: TasteState): TasteState {
