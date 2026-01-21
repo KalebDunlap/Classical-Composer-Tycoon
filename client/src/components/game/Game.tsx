@@ -19,6 +19,7 @@ import { calculatePremiereSuccess } from '@/lib/compositionEngine';
 import { StartScreen } from './StartScreen';
 import { ResourcesSidebar } from './ResourcesSidebar';
 import { LogPanel } from './LogPanel';
+import { HomeTab } from './HomeTab';
 import { ComposeTab } from './ComposeTab';
 import { PremiereTab } from './PremiereTab';
 import { CareerTab } from './CareerTab';
@@ -30,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { 
+  Home,
   Music, 
   Theater, 
   Briefcase, 
@@ -42,7 +44,7 @@ import {
 
 export function Game() {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [activeTab, setActiveTab] = useState('compose');
+  const [activeTab, setActiveTab] = useState('home');
   const [readyForPremiere, setReadyForPremiere] = useState<WorkInProgress | null>(null);
   const [premiereResult, setPremiereResult] = useState<CompletedWork | null>(null);
   const { toast } = useToast();
@@ -127,7 +129,7 @@ export function Game() {
   const handleStartComposition = useCallback((work: WorkInProgress) => {
     if (!gameState) return;
     
-    let newState = {
+    let newState: GameState = {
       ...gameState,
       workInProgress: work
     };
@@ -180,7 +182,7 @@ export function Game() {
     const work = gameState.workInProgress;
     setReadyForPremiere(work);
     
-    let newState = {
+    let newState: GameState = {
       ...gameState,
       workInProgress: null
     };
@@ -447,6 +449,10 @@ export function Game() {
             className="h-full flex flex-col"
           >
             <TabsList className="mx-4 mt-4 mb-0 justify-start bg-muted/50 p-1">
+              <TabsTrigger value="home" className="gap-2" data-testid="tab-home">
+                <Home className="h-4 w-4" />
+                Home
+              </TabsTrigger>
               <TabsTrigger value="compose" className="gap-2" data-testid="tab-compose">
                 <Music className="h-4 w-4" />
                 Compose
@@ -475,7 +481,7 @@ export function Game() {
                 variant="ghost" 
                 size="sm" 
                 onClick={handleNextWeek}
-                className="h-8 gap-2 ml-2 hover:bg-primary/10"
+                className="h-8 gap-2 ml-2"
                 data-testid="button-next-week"
               >
                 <span>Next Week</span>
@@ -484,6 +490,13 @@ export function Game() {
             </TabsList>
             
             <div className="flex-1 overflow-y-auto p-4">
+              <TabsContent value="home" className="m-0 h-full">
+                <HomeTab 
+                  gameState={gameState}
+                  onStartComposing={() => setActiveTab('compose')}
+                />
+              </TabsContent>
+              
               <TabsContent value="compose" className="m-0 h-full">
                 <ComposeTab
                   gameState={gameState}
