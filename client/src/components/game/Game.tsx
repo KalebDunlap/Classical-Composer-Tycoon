@@ -27,6 +27,7 @@ import { UpgradesTab } from './UpgradesTab';
 import { HistoryTab } from './HistoryTab';
 import { EventModal } from './EventModal';
 import { ResultsModal } from './ResultsModal';
+import { AudioPlayer } from './AudioPlayer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -420,6 +421,7 @@ export function Game() {
             Classical Composer Tycoon
           </h1>
           <div className="flex items-center gap-2">
+            <AudioPlayer />
             <Button 
               variant="outline" 
               size="sm" 

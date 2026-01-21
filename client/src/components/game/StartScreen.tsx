@@ -150,6 +150,11 @@ export function StartScreen({ onNewGame, onLoadGame }: StartScreenProps) {
           <p className="text-xs text-muted-foreground text-center pt-4 font-serif italic">
             "Music is the one incorporeal entrance into the higher world of knowledge."
           </p>
+          <div className="pt-4 border-t border-muted">
+            <p className="text-[10px] text-muted-foreground text-center uppercase tracking-widest font-serif opacity-70">
+              Game Music Composed by Kaleb Dunlap
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
