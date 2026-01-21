@@ -382,15 +382,25 @@ function Piano({ type, isPlaying }: { type: 'basic' | 'broadwood' | 'erard'; isP
 
 function Composer({ name, isComposing }: { name: string; isComposing: boolean }) {
   return (
-    <div className="flex flex-col items-center mt-1">
+    <div className="flex flex-col items-center mt-1 relative">
+      {/* Thought bubble to the left */}
+      <div className="absolute -left-12 top-0 w-10">
+        <div className="bg-background/90 border rounded-full px-1.5 py-1 shadow-sm relative animate-in fade-in zoom-in duration-300">
+          <div className="flex justify-center">
+            {isComposing ? (
+              <Lightbulb className="w-3 h-3 text-yellow-500 animate-pulse" />
+            ) : (
+              <span className="text-[8px] leading-none whitespace-nowrap">...</span>
+            )}
+          </div>
+          {/* Bubble tail */}
+          <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-background border-r border-t rotate-45" />
+        </div>
+      </div>
+
       <div className="w-6 h-6 bg-amber-200 dark:bg-amber-300 rounded-full border-2 border-amber-900/50 relative">
         <div className="absolute top-1 left-1 w-1 h-1 bg-gray-800 rounded-full" />
         <div className="absolute top-1 right-1 w-1 h-1 bg-gray-800 rounded-full" />
-        {isComposing && (
-          <div className="absolute -right-2 -top-3">
-            <Lightbulb className="w-3 h-3 text-yellow-500 animate-pulse" />
-          </div>
-        )}
       </div>
       <div className="w-8 h-6 bg-gray-800 dark:bg-gray-700 rounded-t-sm -mt-1" />
       <span className="text-[8px] text-muted-foreground mt-1 font-serif truncate max-w-[60px]">{name}</span>

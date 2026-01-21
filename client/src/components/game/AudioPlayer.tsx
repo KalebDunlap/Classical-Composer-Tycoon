@@ -9,8 +9,8 @@ import allegrettoRomantico from '@assets/Allegretto_Romantico_1768970876674.mp3'
 export function AudioPlayer() {
   const [volume, setVolume] = useState(0.5);
   const [isMuted, setIsMuted] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(() => Math.floor(Math.random() * 2));
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const tracks = [
@@ -27,6 +27,12 @@ export function AudioPlayer() {
       audioRef.current.onended = () => {
         setCurrentTrackIndex((prev) => (prev + 1) % tracks.length);
       };
+
+      // Try to autoplay on mount
+      audioRef.current.play().catch(e => {
+        console.log("Autoplay blocked or failed:", e);
+        setIsPlaying(false);
+      });
     }
 
     return () => {
