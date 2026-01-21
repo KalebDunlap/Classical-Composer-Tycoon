@@ -108,4 +108,38 @@ Three-panel layout following the design guidelines:
   - 4 room tiers based on purchased upgrades (living category)
   - Piano type that changes with instrument upgrades
   - Staff members appear when copyist/assistant upgrades purchased
-  - Animated composition activity indicators
+  - Animated composition activity indicators with thought bubble positioned to the left
+
+### Audio System (January 2026)
+- Background music by Kaleb Dunlap (credited on start screen)
+- Two tracks: "Summer Overture" and "Allegretto Romantico"
+- Autoplay on game start with random track selection
+- Volume control panel with play/pause functionality
+
+### Game Balance Overhaul (January 2026)
+- **Quality Scoring Rebalanced**:
+  - Diminishing returns on skills above level 15
+  - Random "luck" factor (-10 to +8) simulating good/bad composition days
+  - Steeper difficulty penalties for complex forms
+  - Soft cap at 85 quality with diminishing returns above
+  - Base quality now caps at 75 - bonuses required to reach higher scores
+  - Perfect scores (95+) are now rare achievements
+  
+- **Passive Income System**:
+  - Completed works have a "popularity" meter (0-100)
+  - Popularity depletes weekly based on form complexity and quality
+  - Higher quality and more complex works maintain popularity longer
+  - Weekly royalties calculated from: (difficulty × 0.5) × (quality/100) × (popularity/100) × 2
+  - ResourcesSidebar displays weekly publisher income when > 0
+  - HistoryTab shows popularity meter and total royalties per piece
+  
+- **Revival Mechanic**:
+  - After a piece loses all popularity and is 52+ weeks old, 3% weekly chance for revival offer
+  - Only non-revival works with quality >= 50 can receive revival offers
+  - Revival costs: 50 Thalers + 20 Inspiration
+  - Revival creates new version with quality boost from improved skills
+  - RevivalModal.tsx handles the revival offer UI
+  
+### New Game Components
+- `AudioPlayer.tsx`: Background music player with volume control
+- `RevivalModal.tsx`: Modal for accepting/declining revival opportunities
