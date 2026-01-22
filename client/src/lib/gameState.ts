@@ -360,11 +360,16 @@ function processPublisherIncome(
     
     // Check for revival opportunity (only if no pending revival)
     // Must be at least 52 weeks old (1 year), have 0 popularity, quality >= 50
+    // A piece can only be revived once (isRevival: true means it was already a revival,
+    // and we also need to check if any existing completed work is a revival of THIS work)
+    const hasBeenRevived = works.some(w => w.isRevival && w.originalWorkId === work.id);
+
     if (!revivalOpportunity && 
         updatedWork.popularity === 0 && 
         updatedWork.weeksSincePremiere >= 52 &&
         work.quality >= 50 &&
-        !work.isRevival) { // Can't revive a revival
+        !work.isRevival &&
+        !hasBeenRevived) { // Can't revive a piece that was already used as a basis for a revival
       // 3% chance per week for a revival opportunity
       if (Math.random() < 0.03) {
         revivalOpportunity = {
