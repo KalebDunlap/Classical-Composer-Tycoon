@@ -625,8 +625,8 @@ export function Game() {
               </Button>
             </div>
             
-            <div className="flex-1 overflow-hidden p-2 md:p-4">
-              <TabsContent value="home" className="m-0 h-full overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-2 md:p-4">
+              <TabsContent value="home" className="m-0 h-full">
                 <HomeTab 
                   gameState={gameState}
                   onStartComposing={() => setActiveTab('compose')}
